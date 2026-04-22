@@ -11,6 +11,14 @@ import (
 	"github.com/cushycush/stock/internal/commands"
 )
 
+// version is overridden at build time via
+//
+//	-ldflags "-X main.version=vX.Y.Z"
+//
+// so PKGBUILDs, flake builds, and GitHub release binaries all report the
+// same string users see in `go install @vX.Y.Z` artifacts.
+var version = "dev"
+
 // builtins maps subcommand names to their handlers. If an argument isn't here,
 // main looks for a `stock-<arg>` executable on $PATH (Git-style dispatch).
 var builtins = map[string]func(args []string) error{
@@ -35,7 +43,7 @@ func main() {
 		usage()
 		return
 	case "-v", "--version", "version":
-		fmt.Println("stock dev")
+		fmt.Println("stock " + version)
 		return
 	}
 

@@ -10,11 +10,50 @@ hook env contract.
 
 ## Install
 
+### Arch Linux (AUR)
+
+Three packages, pick one:
+
+```sh
+# source build, tracks tagged releases
+yay -S stock
+
+# prebuilt binary from the GitHub release, tracks tagged releases
+yay -S stock-bin
+
+# builds from main, tracks development
+yay -S stock-git
+```
+
+### Nix (flake)
+
+```sh
+# run once
+nix run github:cushycush/stock -- doctor
+
+# install into your profile
+nix profile install github:cushycush/stock
+```
+
+The flake also provides a dev shell with Go + gopls pinned to what CI uses:
+
+```sh
+nix develop github:cushycush/stock
+```
+
+### Go
+
 ```sh
 go install github.com/cushycush/stock/cmd/stock@latest
 ```
 
 Requires Go 1.26+.
+
+### Prebuilt binaries
+
+Every release attaches cross-compiled zips for linux/darwin/windows on amd64
+and arm64 (except windows/arm64). Grab the latest from
+[the releases page](https://github.com/cushycush/stock/releases).
 
 ## Config
 
