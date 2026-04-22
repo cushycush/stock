@@ -4,6 +4,17 @@ All notable changes to `stock` are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-04-22
+
+### Fixed
+
+- `go.sum` was missing entries for `golang.org/x/term` and `golang.org/x/sys`
+  after the v0.2.0 bump to `store-core` (which pulled in `x/term` through
+  its new `ui` package). The workspace `go.work` file masked the gap
+  locally; CI and the release workflow failed on the v0.3.0 tag. Resolved
+  with `GOWORK=off go mod tidy`. The v0.3.0 tag still exists but has no
+  release artifacts — use v0.3.1 or later.
+
 ## [0.3.0] - 2026-04-22
 
 ### Added
