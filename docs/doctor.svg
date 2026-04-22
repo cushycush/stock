@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" role="img" aria-label="Terminal screenshot of the stock doctor command. The header 'package managers:' lists cargo and pacman as available and brew and apt as not installed. Below, 'unservable groups:' shows a misnamed manager called ghost. A 'drift:' section reports that pacman is missing the ripgrep package.">
+  <title>stock doctor — styled output</title>
+
+  <!-- terminal canvas: near-black with the store ember accent traced as a thin hairline -->
+  <rect x="1" y="1" width="718" height="358" rx="10" ry="10" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+  <rect x="1" y="1" width="718" height="358" rx="10" ry="10" fill="none" stroke="#E89A3A" stroke-width="1" stroke-opacity="0.15"/>
+
+  <!-- prompt -->
+  <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="14">
+    <text x="28" y="40" fill="#6b6558">$</text>
+    <text x="44" y="40" fill="#d0d0d0">stock doctor</text>
+
+    <!-- package managers section -->
+    <text x="28" y="72" fill="#EDE6DC" font-weight="bold">package managers:</text>
+
+    <g>
+      <text x="44" y="96"><tspan fill="#8AA27A">[ok]</tspan><tspan fill="#d0d0d0"> cargo      available</tspan></text>
+      <text x="44" y="116"><tspan fill="#6b6558">[  ]</tspan><tspan fill="#6b6558"> brew       not installed</tspan></text>
+      <text x="44" y="136"><tspan fill="#8AA27A">[ok]</tspan><tspan fill="#d0d0d0"> pacman     available</tspan></text>
+      <text x="44" y="156"><tspan fill="#6b6558">[  ]</tspan><tspan fill="#6b6558"> apt        not installed</tspan></text>
+    </g>
+
+    <!-- unservable groups -->
+    <text x="28" y="196" fill="#EDE6DC" font-weight="bold">unservable groups:</text>
+    <text x="44" y="220"><tspan fill="#C27B6B">[error]</tspan><tspan fill="#d0d0d0"> ghost (no available manager among: my-typo)</tspan></text>
+
+    <!-- drift -->
+    <text x="28" y="260" fill="#EDE6DC" font-weight="bold">drift:</text>
+    <text x="44" y="284"><tspan fill="#D9A55E">[warn]</tspan><tspan fill="#d0d0d0"> </tspan><tspan fill="#EDE6DC" font-weight="bold">pacman</tspan><tspan fill="#d0d0d0"> missing: ripgrep</tspan></text>
+
+    <!-- idle prompt after completion — a nod to the store heartbeat, done in dim faint -->
+    <text x="28" y="324" fill="#6b6558">$</text>
+    <text x="44" y="324" fill="#3F3B35">·</text>
+  </g>
+</svg>
