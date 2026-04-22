@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
+	"github.com/cushycush/store-core/hooks"
+	"github.com/cushycush/store-core/platform"
 	"github.com/cushycush/stock/internal/config"
-	"github.com/cushycush/stock/internal/env"
 	"github.com/cushycush/stock/internal/managers"
-	"github.com/cushycush/stock/internal/platform"
 	"github.com/cushycush/stock/internal/runner"
 )
 
@@ -42,7 +43,7 @@ func Setup(dryRun bool) (*Context, error) {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
 	info := platform.Detect()
-	env.Apply(root, info)
+	applyEnv(root)
 
 	var r runner.Runner
 	if dryRun {
@@ -61,6 +62,18 @@ func Setup(dryRun bool) (*Context, error) {
 		Run:    r,
 		DryRun: dryRun,
 	}, nil
+}
+
+// applyEnv exports the shared STORE_* variables into the current process so
+// any subprocess stock launches (hook scripts, the `store` binary) inherits
+// them. The action is left blank here — command-specific actions are set
+// into cmd.Env directly when hooks are invoked.
+func applyEnv(root string) {
+	for _, kv := range hooks.Env(root, "") {
+		if i := strings.IndexByte(kv, '='); i > 0 {
+			os.Setenv(kv[:i], kv[i+1:])
+		}
+	}
 }
 
 // parseFlags returns a FlagSet pre-registered with --dry-run. Every command

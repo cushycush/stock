@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/cushycush/stock/internal/platform"
+	"github.com/cushycush/store-core/platform"
 )
 
 // Platform runs `stock platform` — prints detected platform info. Useful for

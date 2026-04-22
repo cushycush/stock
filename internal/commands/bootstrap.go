@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cushycush/stock/internal/hooks"
+	"github.com/cushycush/store-core/hooks"
 	"github.com/cushycush/stock/internal/managers"
 )
 
@@ -35,7 +35,7 @@ func Bootstrap(args []string) error {
 	}
 
 	fmt.Fprintln(ctx.Stdout, "==> pre-bootstrap hook")
-	if err := hooks.Run(ctx.Root, "pre-bootstrap", ctx.Info); err != nil {
+	if err := hooks.RunGlobal(ctx.Root, "pre-bootstrap", "bootstrap"); err != nil {
 		return err
 	}
 
@@ -59,7 +59,7 @@ func Bootstrap(args []string) error {
 	}
 
 	fmt.Fprintln(ctx.Stdout, "==> post-bootstrap hook")
-	if err := hooks.Run(ctx.Root, "post-bootstrap", ctx.Info); err != nil {
+	if err := hooks.RunGlobal(ctx.Root, "post-bootstrap", "bootstrap"); err != nil {
 		return err
 	}
 
