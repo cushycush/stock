@@ -118,6 +118,17 @@ Hooks receive the standard [`STORE_*` env vars](https://github.com/cushycush/sto
 
 Contributions of new managers live in [`internal/managers/`](./internal/managers). Each file registers itself via `init()` and implements a short interface (`Name`, `Available`, `Installed`, `Install`, `BootstrapHint`).
 
+## Development
+
+```sh
+make build                    # builds ./stock
+make dogfood                  # ubuntu container with stock + a fixture mounted
+make dogfood DISTRO=fedora    # alternatives: ubuntu · debian · fedora · alpine · arch
+go test ./...
+```
+
+`make dogfood` is the preferred way to exercise real package managers against a clean slate without installing them on your host. The fixture under [`hack/dogfood/`](hack/dogfood/) includes a deliberately-broken group so `stock doctor` and `stock install` both have something to complain about.
+
 ## Non-goals (for now)
 
 - **Uninstalling or pinning package versions.** `stock` is a declarative installer, not a full state reconciler. Use your package manager directly for removals or specific versions.

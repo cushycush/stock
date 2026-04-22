@@ -1,0 +1,12 @@
+#!/bin/sh
+# Records STORE_* and a timestamp so dogfood sessions can verify the
+# env contract end-to-end: run stock install, then inspect
+# .store/hook-env.log and .store/hook-log under the fixture.
+set -eu
+
+mkdir -p "$STORE_ROOT/.store"
+env | grep '^STORE_' | sort > "$STORE_ROOT/.store/hook-env.log"
+
+printf 'pre-install ran %s (action=%s)\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${STORE_ACTION:-unset}" \
+    >> "$STORE_ROOT/.store/hook-log"

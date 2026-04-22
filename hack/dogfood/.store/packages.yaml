@@ -1,0 +1,31 @@
+# Dogfood fixture for `make dogfood`. Exercises:
+#   - cross-manager `core` group with alt names (fd vs fd-find).
+#   - linux-only `dev` group gated by when: os.
+#   - an intentional typo (`my-typo`) so `stock doctor` flags an
+#     unservable group and `stock install` emits an unknown-manager
+#     warning — proves the diagnostics path is alive.
+#
+# Packages chosen for small download size; every distro image should have
+# all of these in its default repos.
+
+packages:
+  core:
+    apt:    [git, ripgrep, fd-find, bat, jq]
+    pacman: [git, ripgrep, fd, bat, jq]
+    dnf:    [git, ripgrep, fd-find, bat, jq]
+    apk:    [git, ripgrep, fd, bat, jq]
+    brew:   [git, ripgrep, fd, bat, jq]
+    when:   { os: [linux, darwin] }
+
+  dev:
+    apt:    [build-essential]
+    pacman: [base-devel]
+    dnf:    [gcc, make]
+    apk:    [build-base]
+    when:   { os: linux }
+
+  ghost:
+    # Deliberate typo. `stock doctor` should flag this group as
+    # unservable; `stock install` should print an unknown-manager
+    # warning. If either stays silent, file a bug.
+    my-typo: [does-not-matter]

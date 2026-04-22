@@ -1,0 +1,9 @@
+#!/bin/sh
+# Companion to pre-install. Appends a line to hook-log so dogfood
+# sessions can confirm both phases fired.
+set -eu
+
+mkdir -p "$STORE_ROOT/.store"
+printf 'post-install ran %s (action=%s)\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${STORE_ACTION:-unset}" \
+    >> "$STORE_ROOT/.store/hook-log"
