@@ -21,13 +21,19 @@ var version = "dev"
 
 // builtins maps subcommand names to their handlers. If an argument isn't here,
 // main looks for a `stock-<arg>` executable on $PATH (Git-style dispatch).
-var builtins = map[string]func(args []string) error{
-	"install":   commands.Install,
-	"diff":      commands.Diff,
-	"doctor":    commands.Doctor,
-	"snapshot":  commands.Snapshot,
-	"platform":  commands.Platform,
-	"bootstrap": commands.Bootstrap,
+// Populated in init() so the TUI handler can close over the version string.
+var builtins map[string]func(args []string) error
+
+func init() {
+	builtins = map[string]func(args []string) error{
+		"install":   commands.Install,
+		"diff":      commands.Diff,
+		"doctor":    commands.Doctor,
+		"snapshot":  commands.Snapshot,
+		"platform":  commands.Platform,
+		"bootstrap": commands.Bootstrap,
+		"tui":       commands.TUI(version),
+	}
 }
 
 func main() {
@@ -92,6 +98,7 @@ commands:
   snapshot             write currently installed packages to .store/packages.yaml
   platform             print detected platform info
   bootstrap            run the full new-machine flow (hooks, install, store)
+  tui                  open the read-only interactive dashboard
 
 flags:
   --dry-run            print commands that would run (install, bootstrap)
