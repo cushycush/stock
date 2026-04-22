@@ -6,8 +6,14 @@ import (
 	"os"
 
 	"github.com/cushycush/store-core/hooks"
+	"github.com/cushycush/store-core/ui"
 	"github.com/cushycush/stock/internal/managers"
 )
+
+// section prints a styled phase header so bootstrap's progress is scannable.
+func section(ctx *Context, label string) {
+	fmt.Fprintln(ctx.Stdout, ui.Bold("==> "+label))
+}
 
 // Bootstrap runs the full new-machine orchestration:
 //
@@ -34,44 +40,44 @@ func Bootstrap(args []string) error {
 		return err
 	}
 
-	fmt.Fprintln(ctx.Stdout, "==> pre-bootstrap hook")
+	section(ctx, "pre-bootstrap hook")
 	if err := hooks.RunGlobal(ctx.Root, "pre-bootstrap", "bootstrap"); err != nil {
 		return err
 	}
 
-	fmt.Fprintln(ctx.Stdout, "==> package managers")
+	section(ctx, "package managers")
 	bootstrapManagers(ctx)
 
-	fmt.Fprintln(ctx.Stdout, "==> stock install")
+	section(ctx, "stock install")
 	if err := RunInstall(ctx, nil); err != nil {
 		return err
 	}
 
 	if !*skipStore {
-		fmt.Fprintln(ctx.Stdout, "==> store (symlinks)")
+		section(ctx, "store (symlinks)")
 		if ctx.Run.Has("store") {
 			if err := ctx.Run.Run("store"); err != nil {
-				fmt.Fprintf(ctx.Stderr, "warning: store exited with error: %s\n", err)
+				fmt.Fprintln(ctx.Stderr, ui.Warning(fmt.Sprintf("store exited with error: %s", err)))
 			}
 		} else {
-			fmt.Fprintln(ctx.Stderr, "warning: store binary not found on PATH; skipping symlink step")
+			fmt.Fprintln(ctx.Stderr, ui.Warning("store binary not found on PATH; skipping symlink step"))
 		}
 	}
 
-	fmt.Fprintln(ctx.Stdout, "==> post-bootstrap hook")
+	section(ctx, "post-bootstrap hook")
 	if err := hooks.RunGlobal(ctx.Root, "post-bootstrap", "bootstrap"); err != nil {
 		return err
 	}
 
-	fmt.Fprintln(ctx.Stdout, "==> stock doctor")
+	section(ctx, "stock doctor")
 	if err := RunDoctor(ctx); err != nil {
 		return err
 	}
 	if !*skipStore && ctx.Run.Has("store") {
-		fmt.Fprintln(ctx.Stdout, "==> store doctor")
+		section(ctx, "store doctor")
 		if err := ctx.Run.Run("store", "doctor"); err != nil {
 			// store may not yet implement doctor; warn rather than fail.
-			fmt.Fprintf(ctx.Stderr, "note: store doctor returned %s\n", err)
+			fmt.Fprintln(ctx.Stderr, ui.Dim(fmt.Sprintf("note: store doctor returned %s", err)))
 		}
 	}
 	return nil

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cushycush/store-core/platform"
+	"github.com/cushycush/store-core/ui"
 )
 
 // Platform runs `stock platform` — prints detected platform info. Useful for
@@ -15,12 +16,15 @@ func Platform(args []string) error {
 	}
 
 	info := platform.Detect()
-	fmt.Printf("os:       %s\n", info.OS)
-	fmt.Printf("arch:     %s\n", info.Arch)
-	fmt.Printf("distro:   %s\n", emptyDash(info.Distro))
-	fmt.Printf("hostname: %s\n", info.Hostname)
-	fmt.Printf("shell:    %s\n", emptyDash(info.Shell))
-	fmt.Printf("wsl:      %t\n", info.WSL)
+	row := func(label, value string) {
+		fmt.Printf("%s %s\n", ui.Dim(fmt.Sprintf("%-9s", label+":")), value)
+	}
+	row("os", info.OS)
+	row("arch", info.Arch)
+	row("distro", emptyDash(info.Distro))
+	row("hostname", info.Hostname)
+	row("shell", emptyDash(info.Shell))
+	row("wsl", fmt.Sprintf("%t", info.WSL))
 	return nil
 }
 

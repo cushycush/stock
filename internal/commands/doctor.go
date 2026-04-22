@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/cushycush/store-core/ui"
 	"github.com/cushycush/stock/internal/managers"
 )
 
@@ -29,35 +30,37 @@ func RunDoctor(ctx *Context) error {
 	// when the user listed apt as a Debian-family alternative inside the
 	// same group as pacman. The load-bearing signal is unservable groups
 	// (below), not this list.
-	fmt.Fprintln(ctx.Stdout, "package managers:")
+	fmt.Fprintln(ctx.Stdout, ui.Bold("package managers:"))
 	for _, name := range managers.Names() {
 		m := managers.Get(name)
+		chip := ui.DoctorOK()
 		status := "available"
 		if !m.Available() {
-			status = "not installed"
+			chip = ui.Dim("[  ]")
+			status = ui.Dim("not installed")
 		}
-		fmt.Fprintf(ctx.Stdout, "  %-10s %s\n", name, status)
+		fmt.Fprintf(ctx.Stdout, "  %s %-10s %s\n", chip, name, status)
 	}
 
 	// Unservable groups: a group that applies to this platform but has no
 	// available manager. This is the real error case — packages.yaml says
 	// to install something and we have no way to do it.
 	if unservable := unservableGroups(ctx); len(unservable) > 0 {
-		fmt.Fprintln(ctx.Stdout, "\nunservable groups:")
+		fmt.Fprintln(ctx.Stdout, "\n"+ui.Bold("unservable groups:"))
 		for _, line := range unservable {
-			fmt.Fprintf(ctx.Stdout, "  %s\n", line)
+			fmt.Fprintf(ctx.Stdout, "  %s %s\n", ui.DoctorError(), line)
 		}
 	}
 
 	// Drift: among managers we can actually run, what's declared but not
 	// installed? This is what `stock install` would change.
-	fmt.Fprintln(ctx.Stdout, "\ndrift:")
+	fmt.Fprintln(ctx.Stdout, "\n"+ui.Bold("drift:"))
 	plans, warnings, err := computePlan(ctx, nil)
 	if err != nil {
 		return err
 	}
 	for _, w := range warnings {
-		fmt.Fprintf(ctx.Stderr, "warning: %s\n", w)
+		fmt.Fprintln(ctx.Stderr, ui.Warning(w.Error()))
 	}
 	anyDrift := false
 	for _, p := range plans {
@@ -65,10 +68,11 @@ func RunDoctor(ctx *Context) error {
 			continue
 		}
 		anyDrift = true
-		fmt.Fprintf(ctx.Stdout, "  %s missing: %s\n", p.Manager.Name(), strings.Join(p.Missing, " "))
+		fmt.Fprintf(ctx.Stdout, "  %s %s missing: %s\n",
+			ui.DoctorWarn(), ui.Bold(p.Manager.Name()), strings.Join(p.Missing, " "))
 	}
 	if !anyDrift {
-		fmt.Fprintln(ctx.Stdout, "  none — installed state matches packages.yaml")
+		fmt.Fprintf(ctx.Stdout, "  %s installed state matches packages.yaml\n", ui.DoctorOK())
 	}
 	return nil
 }

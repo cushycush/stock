@@ -2,7 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"strings"
+
+	"github.com/cushycush/store-core/ui"
 )
 
 // Diff runs `stock diff [group...]` — previews what install would do.
@@ -29,28 +30,30 @@ func Diff(args []string) error {
 		return err
 	}
 	for _, w := range warnings {
-		fmt.Fprintf(ctx.Stderr, "warning: %s\n", w)
+		fmt.Fprintln(ctx.Stderr, ui.Warning(w.Error()))
 	}
 
 	if len(plans) == 0 {
-		fmt.Fprintln(ctx.Stdout, "no managers apply to the current platform")
+		fmt.Fprintln(ctx.Stdout, ui.Dim("no managers apply to the current platform"))
 		return nil
 	}
 
 	anyMissing := false
 	for _, p := range plans {
 		if len(p.Missing) == 0 {
-			fmt.Fprintf(ctx.Stdout, "%s: up to date (%d package(s))\n", p.Manager.Name(), len(p.Desired))
+			fmt.Fprintf(ctx.Stdout, "%s %s: up to date (%d package(s))\n",
+				ui.DoctorOK(), ui.Bold(p.Manager.Name()), len(p.Desired))
 			continue
 		}
 		anyMissing = true
-		fmt.Fprintf(ctx.Stdout, "%s: would install %d package(s):\n", p.Manager.Name(), len(p.Missing))
+		fmt.Fprintf(ctx.Stdout, "%s: would install %d package(s):\n",
+			ui.Bold(p.Manager.Name()), len(p.Missing))
 		for _, pkg := range p.Missing {
-			fmt.Fprintf(ctx.Stdout, "  + %s\n", pkg)
+			fmt.Fprintf(ctx.Stdout, "  %s %s\n", ui.Green("+"), pkg)
 		}
 	}
 	if !anyMissing {
-		fmt.Fprintln(ctx.Stdout, strings.TrimSpace("everything declared in packages.yaml is already installed"))
+		fmt.Fprintln(ctx.Stdout, ui.Success("everything declared in packages.yaml is already installed"))
 	}
 	return nil
 }

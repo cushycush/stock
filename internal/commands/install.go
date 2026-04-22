@@ -3,6 +3,8 @@ package commands
 import (
 	"fmt"
 	"strings"
+
+	"github.com/cushycush/store-core/ui"
 )
 
 // Install runs `stock install [group...]`.
@@ -31,21 +33,22 @@ func RunInstall(ctx *Context, groupArgs []string) error {
 		return err
 	}
 	for _, w := range warnings {
-		fmt.Fprintf(ctx.Stderr, "warning: %s\n", w)
+		fmt.Fprintln(ctx.Stderr, ui.Warning(w.Error()))
 	}
 
 	if len(plans) == 0 {
-		fmt.Fprintln(ctx.Stdout, "nothing to install: no managers matched the current platform")
+		fmt.Fprintln(ctx.Stdout, ui.Dim("nothing to install: no managers matched the current platform"))
 		return nil
 	}
 
 	for _, p := range plans {
 		if len(p.Missing) == 0 {
-			fmt.Fprintf(ctx.Stdout, "%s: up to date (%d package(s))\n", p.Manager.Name(), len(p.Desired))
+			fmt.Fprintf(ctx.Stdout, "%s %s: up to date (%d package(s))\n",
+				ui.DoctorOK(), ui.Bold(p.Manager.Name()), len(p.Desired))
 			continue
 		}
 		fmt.Fprintf(ctx.Stdout, "%s: installing %d package(s): %s\n",
-			p.Manager.Name(), len(p.Missing), strings.Join(p.Missing, " "))
+			ui.Bold(p.Manager.Name()), len(p.Missing), strings.Join(p.Missing, " "))
 		if err := p.Manager.Install(p.Missing); err != nil {
 			return fmt.Errorf("%s: %w", p.Manager.Name(), err)
 		}

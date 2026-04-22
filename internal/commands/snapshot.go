@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/cushycush/store-core/ui"
 	"github.com/cushycush/stock/internal/config"
 	"github.com/cushycush/stock/internal/managers"
 	"gopkg.in/yaml.v3"
@@ -46,7 +47,7 @@ func Snapshot(args []string) error {
 				return fmt.Errorf("unknown manager: %s", name)
 			}
 			if !m.Available() {
-				fmt.Fprintf(ctx.Stderr, "warning: %s not available; skipping\n", name)
+				fmt.Fprintln(ctx.Stderr, ui.Warning(fmt.Sprintf("%s not available; skipping", name)))
 				continue
 			}
 			chosen = append(chosen, m)
@@ -64,7 +65,7 @@ func Snapshot(args []string) error {
 	for _, m := range chosen {
 		pkgs, err := m.Installed()
 		if err != nil {
-			fmt.Fprintf(ctx.Stderr, "warning: %s installed: %s\n", m.Name(), err)
+			fmt.Fprintln(ctx.Stderr, ui.Warning(fmt.Sprintf("%s installed: %s", m.Name(), err)))
 			continue
 		}
 		if len(pkgs) == 0 {
@@ -94,7 +95,7 @@ func Snapshot(args []string) error {
 	if err := os.WriteFile(target, []byte(out), 0o644); err != nil {
 		return err
 	}
-	fmt.Fprintf(ctx.Stdout, "wrote %s\n", target)
+	fmt.Fprintln(ctx.Stdout, ui.Success("wrote "+target))
 	return nil
 }
 
