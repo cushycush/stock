@@ -5,8 +5,20 @@ Package, tool, and runtime installer. Companion to
 inventory. Same `.store/` directory, same `when:` platform filters, same
 hook env contract.
 
-> **Status:** v1 complete, no unit tests yet. Manually exercised against
-> fixture configs on Linux. Use on real machines at your own risk.
+> **Status:** v0.3 shipping. Unit-tested on the load-bearing paths (config
+> parsing, runner dispatch, plan orchestration, install flow). Not yet
+> dogfooded on a real machine beyond the maintainer's — report sharp edges.
+
+## Related
+
+- [**`store`**](https://github.com/cushycush/store) — the symlink manager
+  this tool is a companion to. If you have both on `$PATH`, `store` will
+  delegate unknown subcommands to `stock` via git-style dispatch
+  (`store stock doctor` ≡ `stock doctor`), and its TUI header shows a
+  dim `stock` signpost so you know the companion is available.
+- [**`store-core`**](https://github.com/cushycush/store-core) — the shared
+  Go module both tools import for platform detection, `when:` matching,
+  and the `STORE_*` hook env contract.
 
 ## Install
 
