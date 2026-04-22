@@ -28,8 +28,20 @@ build:
 # `stock install`, `stock bootstrap`. Exit when done — the container is
 # destroyed with --rm.
 dogfood: build
-	@echo "==> dogfooding stock on $(DISTRO) ($(IMAGE)) via $(CONTAINER)"
+	@command -v $(CONTAINER) >/dev/null 2>&1 || { \
+		echo "error: '$(CONTAINER)' not found on \$$PATH"; \
+		echo; \
+		echo "install a container runtime:"; \
+		echo "  Arch:    sudo pacman -S podman"; \
+		echo "  Debian:  sudo apt install podman   (or docker.io)"; \
+		echo "  Fedora:  sudo dnf install podman"; \
+		echo "  macOS:   brew install podman && podman machine init && podman machine start"; \
+		echo; \
+		echo "already have one under a different name? override: make dogfood CONTAINER=docker"; \
+		exit 1; \
+	}
 	@test -x ./stock || { echo "build failed"; exit 1; }
+	@echo "==> dogfooding stock on $(DISTRO) ($(IMAGE)) via $(CONTAINER)"
 	$(CONTAINER) run --rm -it \
 		-v $(CURDIR)/stock:/usr/local/bin/stock:Z \
 		-v $(CURDIR)/hack/dogfood:/root/dotfiles:Z \
