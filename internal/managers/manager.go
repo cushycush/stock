@@ -51,6 +51,10 @@ func Register(m Manager) {
 // Get returns the manager with the given name, or nil if unknown.
 func Get(name string) Manager { return defaultRegistry.managers[name] }
 
+// Unregister removes a manager from the default registry. Intended for tests
+// that inject fakes — a test is the only legitimate caller outside init().
+func Unregister(name string) { delete(defaultRegistry.managers, name) }
+
 // Names returns every registered manager name in deterministic order.
 func Names() []string {
 	out := make([]string, 0, len(defaultRegistry.managers))
