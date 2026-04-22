@@ -2,6 +2,9 @@
 /stock
 /bin/
 
+# Python venv for docs/hero-demo/snapshot.py
+/docs/hero-demo/.venv/
+
 # IDE / editor
 .idea/
 .vscode/

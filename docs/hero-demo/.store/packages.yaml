@@ -1,0 +1,44 @@
+# Demo fixture for the stock TUI hero screenshot.
+#
+# Each group is designed to produce a different row state when stock
+# queries pacman on the author's machine:
+#
+#   casks         ✕ unservable  — only brew-cask, not on Linux
+#   cli           ● installed   — git, fzf, htop, jq, less (all explicit)
+#   dev-tools     ◐ partial     — eza, lazygit, bat in; atuin, starship out
+#   editors       ● installed   — neovim
+#   macos-gui     — skipped     — when: os darwin
+#   prompt-tools  ○ missing     — starship + atuin
+#
+# If you run this on a different machine, states will differ based on what
+# pacman (or your platform's manager) has explicitly installed. That's the
+# point — the same packages.yaml describes the intent, and `stock` shows
+# you where you are against it.
+
+packages:
+  casks:
+    brew-cask: [rectangle, raycast]
+
+  cli:
+    pacman: [git, fzf, htop, jq, less]
+    apt:    [git, fzf, htop, jq, less]
+    brew:   [git, fzf, htop, jq, less]
+
+  dev-tools:
+    pacman: [eza, lazygit, bat, atuin, starship]
+    apt:    [eza, lazygit, bat, atuin, starship]
+    brew:   [eza, lazygit, bat, atuin, starship]
+
+  editors:
+    pacman: [neovim]
+    apt:    [neovim]
+    brew:   [neovim]
+
+  macos-gui:
+    brew-cask: [slack, zoom, raycast]
+    when: { os: [darwin] }
+
+  prompt-tools:
+    pacman: [starship, atuin]
+    apt:    [starship, atuin]
+    brew:   [starship, atuin]

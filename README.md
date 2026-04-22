@@ -1,4 +1,4 @@
-![stock doctor output](docs/doctor.svg)
+![stock TUI screenshot](docs/hero.png)
 
 [![test](https://img.shields.io/github/actions/workflow/status/cushycush/stock/test.yml?branch=main&style=for-the-badge&label=test&color=E89A3A&labelColor=1c1c1c&logo=githubactions&logoColor=E89A3A)](https://github.com/cushycush/stock/actions/workflows/test.yml)
 [![release](https://img.shields.io/github/v/release/cushycush/stock?style=for-the-badge&color=E89A3A&labelColor=1c1c1c&logo=github&logoColor=E89A3A)](https://github.com/cushycush/stock/releases)
@@ -81,6 +81,7 @@ Listing multiple managers inside one group is the intended pattern. `stock` runs
 - `stock install [group...]` — install everything matching platform + `when:`
 - `stock diff [group...]` — preview what `install` would change (read-only)
 - `stock doctor` — verify managers, detect drift from `packages.yaml`
+- `stock tui` — read-only interactive dashboard (see [below](#interactive-tui))
 
 **Maintenance**
 
@@ -98,6 +99,62 @@ Listing multiple managers inside one group is the intended pattern. `stock` runs
 - `bootstrap --skip-store` — run hooks and `install`, but skip invoking the `store` binary afterwards.
 
 Unknown commands fall back to `stock-<name>` on `$PATH` (git-style), so you can add your own subcommands without recompiling.
+
+## Interactive TUI
+
+`stock tui` opens a keyboard-driven, read-only dashboard over the same `packages.yaml` the CLI works against. The screenshot at the top of this README is a live capture; the fixture and `snapshot.py` that produced it live under [`docs/hero-demo/`](docs/hero-demo/).
+
+The layout is a single vertical column: a ledger of every group at the top, the selected group's per-manager breakdown underneath. No panes, no outer frame — the design matches [`store`](https://github.com/cushycush/store)'s TUI so the pair reads as one product.
+
+```text
+  stock                                          ~/dotfiles   linux/amd64   store
+
+  ─── 6 groups ─── ● 2 installed  ◐ 1 partial  ○ 1 missing  — 1 skipped  ✕ 1 unservable ─
+
+     casks         no manager available                   ✕  unservable
+     cli           5 pkgs                                 ●  installed
+  ▸  dev-tools    3 pkgs · 2 missing                      ◐  partial
+     editors       1 pkg                                  ●  installed
+     macos-gui    needs os darwin                         —  skipped
+     prompt-tools 2 pkgs missing                          ○  missing
+
+  ─── dev-tools ─────────────────────────────────────────────── partial ─
+
+    apt    (5 pkgs · not on this machine)
+        eza, lazygit, bat, atuin, starship
+
+    brew   (5 pkgs · not on this machine)
+        eza, lazygit, bat, atuin, starship
+
+    pacman  3/5 installed · 2 missing
+      +  atuin
+      +  starship
+
+  j/k move   / filter   r refresh   ? help   q quit
+```
+
+Alternative managers that don't apply on the current platform are dimmed and labelled `not on this machine` — they're still declared in the config, so the TUI shows what's there rather than hiding it. The `+` lines mark what `stock install` would install.
+
+### Keymap
+
+**Navigate**
+
+| Key | Action |
+| --- | ------ |
+| `j` / `k` | Move up / down the group list |
+| `g` / `G` | Top / bottom |
+| `esc` / `h` | Clear the filter · close the top overlay |
+
+**Inspect**
+
+| Key | Action |
+| --- | ------ |
+| `/` | Filter groups by name (type, `enter` to commit, `esc` to clear) |
+| `r` | Recompute against live manager state (useful after installing something in another shell) |
+| `?` | Help overlay |
+| `q` / `ctrl+c` | Quit |
+
+The TUI does not run installers. Actions (`install`, `diff`, `snapshot`) stay on the CLI; the dashboard is a read-only inspector so touching `pacman` / `apt` / `brew` still requires typing the verb yourself.
 
 ## Hooks
 
