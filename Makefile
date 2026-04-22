@@ -1,8 +1,5 @@
 VERSION ?= v0.3.1-dev
 
-# Container runtime: prefer podman (common on Arch), fall back to docker.
-CONTAINER ?= $(shell command -v podman >/dev/null 2>&1 && echo podman || echo docker)
-
 # Target distro for `make dogfood`. Override with `make dogfood DISTRO=fedora`.
 DISTRO ?= ubuntu
 IMAGE_ubuntu := ubuntu:24.04
@@ -21,30 +18,28 @@ build:
 # shell-out bugs unit tests miss.
 #
 #   make dogfood                  # ubuntu by default
-#   make dogfood DISTRO=fedora    # other distros
-#   make dogfood CONTAINER=docker # force docker over podman
+#   make dogfood DISTRO=fedora    # other distros: ubuntu · debian · fedora · alpine · arch
 #
 # Inside the shell try: `stock platform`, `stock doctor`, `stock diff`,
 # `stock install`, `stock bootstrap`. Exit when done — the container is
 # destroyed with --rm.
 dogfood: build
-	@command -v $(CONTAINER) >/dev/null 2>&1 || { \
-		echo "error: '$(CONTAINER)' not found on \$$PATH"; \
+	@command -v docker >/dev/null 2>&1 || { \
+		echo "error: docker not found on \$$PATH"; \
 		echo; \
-		echo "install a container runtime:"; \
-		echo "  Arch:    sudo pacman -S podman"; \
-		echo "  Debian:  sudo apt install podman   (or docker.io)"; \
-		echo "  Fedora:  sudo dnf install podman"; \
-		echo "  macOS:   brew install podman && podman machine init && podman machine start"; \
-		echo; \
-		echo "already have one under a different name? override: make dogfood CONTAINER=docker"; \
+		echo "install it:"; \
+		echo "  Arch:    sudo pacman -S docker && sudo systemctl enable --now docker"; \
+		echo "           sudo usermod -aG docker \$$USER   # then log out + back in"; \
+		echo "  Debian:  sudo apt install docker.io"; \
+		echo "  Fedora:  sudo dnf install docker-ce"; \
+		echo "  macOS:   brew install --cask docker"; \
 		exit 1; \
 	}
 	@test -x ./stock || { echo "build failed"; exit 1; }
-	@echo "==> dogfooding stock on $(DISTRO) ($(IMAGE)) via $(CONTAINER)"
-	$(CONTAINER) run --rm -it \
-		-v $(CURDIR)/stock:/usr/local/bin/stock:Z \
-		-v $(CURDIR)/hack/dogfood:/root/dotfiles:Z \
+	@echo "==> dogfooding stock on $(DISTRO) ($(IMAGE))"
+	docker run --rm -it \
+		-v $(CURDIR)/stock:/usr/local/bin/stock \
+		-v $(CURDIR)/hack/dogfood:/root/dotfiles \
 		-w /root/dotfiles \
 		-e FORCE_COLOR=1 \
 		$(IMAGE) bash
