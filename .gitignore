@@ -1,0 +1,13 @@
+# Go build output
+/stock
+/bin/
+
+# IDE / editor
+.idea/
+.vscode/
+
+# OS / tool droppings
+.DS_Store
+.claude/
+.opencode/
+.mcp.json
