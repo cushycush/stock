@@ -1,6 +1,9 @@
 package managers
 
-import "strings"
+import (
+	"os"
+	"strings"
+)
 
 type apt struct{ base }
 
@@ -32,14 +35,46 @@ func (a *apt) Install(pkgs []string) error {
 	if len(missing) == 0 {
 		return nil
 	}
-	args := append([]string{"apt-get", "install", "-y"}, missing...)
-	// apt-get needs root. Prefer sudo if we're not already root — fail with
-	// a clear message rather than a cryptic permission error.
+	// Fresh Debian/Ubuntu images (and long-idle hosts) ship with an empty
+	// /var/lib/apt/lists, so `apt-get install` fails with "Unable to locate
+	// package" until `apt-get update` has run at least once. Refresh here
+	// so `stock install` works end-to-end on a clean machine.
+	if aptListsEmpty() {
+		if err := a.runAsRoot("apt-get", "update"); err != nil {
+			return err
+		}
+	}
+	return a.runAsRoot(append([]string{"apt-get", "install", "-y"}, missing...)...)
+}
+
+// runAsRoot invokes an apt-get verb, prefixing sudo when not already root.
+// Failing here with a clear sudo-missing error beats a cryptic permission
+// denied out of apt itself.
+func (a *apt) runAsRoot(argv ...string) error {
 	if !isRoot() {
 		if !a.runner().Has("sudo") {
-			return errNoSudo("apt-get install", strings.Join(missing, " "))
+			return errNoSudo(strings.Join(argv[:2], " "), strings.Join(argv[2:], " "))
 		}
-		args = append([]string{"sudo"}, args...)
+		argv = append([]string{"sudo"}, argv...)
 	}
-	return a.runner().Run(args[0], args[1:]...)
+	return a.runner().Run(argv[0], argv[1:]...)
+}
+
+// aptListsEmpty reports whether /var/lib/apt/lists has no cached repo data.
+// `lock` and `partial/` always exist even on a freshly-wiped cache, so we
+// ignore them. A missing or unreadable directory is treated as empty so the
+// caller triggers `apt-get update`, which will create it.
+func aptListsEmpty() bool {
+	entries, err := os.ReadDir("/var/lib/apt/lists")
+	if err != nil {
+		return true
+	}
+	for _, e := range entries {
+		switch e.Name() {
+		case "lock", "partial":
+			continue
+		}
+		return false
+	}
+	return true
 }
