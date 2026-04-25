@@ -4,6 +4,46 @@ All notable changes to `stock` are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-25
+
+### Added
+
+- **`stock tui`** — read-only keyboard-driven dashboard over
+  `packages.yaml`. Each group shows its install state (installed,
+  partial, missing, skipped, unservable) and the detail pane lists the
+  missing packages per applicable manager. Skipped groups keep their
+  declared lists dimmed so cross-platform alternatives stay readable,
+  and the `when:` mismatch reason is surfaced inline (`needs os
+  darwin`). Shares `store`'s palette, glyph family, and rule typography
+  so the two binaries read as a matched pair. Keymap is intentionally
+  small (`j`/`k`/`g`/`G`, `/`, `r`, `?`, `q`); install and diff stay on
+  the CLI for now while the keymap settles.
+- **`make dogfood`** — builds `stock` from source and launches a
+  throwaway container with the binary and a fixture dotfiles repo
+  mounted, so you can exercise install / diff / doctor / bootstrap
+  against a real package manager on a clean slate without touching
+  your host. Defaults to Ubuntu; `make dogfood DISTRO=fedora`
+  (or `debian`, `alpine`, `arch`) picks a different base. Useful
+  install hints are printed when no container runtime is on `$PATH`.
+
+### Fixed
+
+- **apt: refresh empty package lists before installing.** Fresh
+  Debian and Ubuntu Docker images ship with an empty
+  `/var/lib/apt/lists`, so `apt-get install` failed with "Unable to
+  locate package" until `apt-get update` had run once. Long-idle hosts
+  hit the same thing. `stock install` now detects the empty-cache case
+  and refreshes lists first, so it works end-to-end on a clean machine.
+
+### Changed
+
+- README leads with the TUI hero screenshot, adds an **Interactive
+  TUI** section with the keymap, and lists `stock tui` under the
+  day-to-day commands. Cross-links to
+  [`store`](https://github.com/cushycush/store) and
+  [`store-core`](https://github.com/cushycush/store-core) added near
+  the top.
+
 ## [0.3.1] - 2026-04-22
 
 ### Fixed
